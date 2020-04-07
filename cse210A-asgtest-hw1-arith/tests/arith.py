@@ -10,8 +10,8 @@
 #
 # EOF (end-of-file) token is used to indicate that
 # there is no more input left for lexical analysis
-INTEGER, PLUS, MINUS, MUL, DIV, LPAREN, RPAREN, EOF, NONE = (
-    'INTEGER', 'PLUS', 'MINUS', 'MUL', 'DIV', '(', ')', 'EOF', 'NONE'
+INTEGER, PLUS, MINUS, MUL, DIV, LPAREN, RPAREN, EOF = (
+    'INTEGER', 'PLUS', 'MINUS', 'MUL', 'DIV', '(', ')', 'EOF'
 )
 
 
@@ -124,19 +124,9 @@ class AST(object):
 
 class BinOp(AST):
     def __init__(self, left, op, right):
-        # need to check if right or left operand are none, for example -1 has None before minus
-        if left is None:
-            self.left = Num(Token(INTEGER, 0))
-        else:
-            self.left = left
-
+        self.left = left
         self.token = self.op = op
-
-        if right is None:
-            self.right = Num(Token(INTEGER, 0))
-        else:
-            self.right = right
-
+        self.right = right
 
 class Num(AST):
     def __init__(self, token):
@@ -174,6 +164,17 @@ class Parser(object):
             node = self.expr()
             self.eat(RPAREN)
             return node
+        else:  # when token type is + or - meaning it's a sign for integer
+            sign = token.type
+            self.eat(sign)
+            if sign == MINUS:
+                token = self.current_token
+                self.eat(INTEGER)
+                return Num(Token(INTEGER, -1 * token.value))
+            else:
+                token = self.current_token
+                self.eat(INTEGER)
+                return Num(Token(INTEGER, token.value))
 
     def term(self):
         """term : factor ((MUL | DIV) factor)*"""
