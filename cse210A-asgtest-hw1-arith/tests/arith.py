@@ -124,12 +124,18 @@ class AST(object):
 
 class BinOp(AST):
     def __init__(self, left, op, right):
+        # need to check if right or left operand are none, for example -1 has None before minus
         if left is None:
             self.left = Num(Token(INTEGER, 0))
         else:
             self.left = left
+
         self.token = self.op = op
-        self.right = right
+
+        if right is None:
+            self.right = Num(Token(INTEGER, 0))
+        else:
+            self.right = right
 
 
 class Num(AST):
