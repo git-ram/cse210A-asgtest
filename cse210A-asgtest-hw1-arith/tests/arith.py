@@ -10,8 +10,8 @@
 #
 # EOF (end-of-file) token is used to indicate that
 # there is no more input left for lexical analysis
-INTEGER, PLUS, MINUS, MUL, DIV, LPAREN, RPAREN, EOF = (
-    'INTEGER', 'PLUS', 'MINUS', 'MUL', 'DIV', '(', ')', 'EOF'
+INTEGER, PLUS, MINUS, MUL, DIV, LPAREN, RPAREN, EOF, NONE = (
+    'INTEGER', 'PLUS', 'MINUS', 'MUL', 'DIV', '(', ')', 'EOF', 'NONE'
 )
 
 
@@ -124,7 +124,10 @@ class AST(object):
 
 class BinOp(AST):
     def __init__(self, left, op, right):
-        self.left = left
+        if left is None:
+            self.left = Num(Token(INTEGER, 0))
+        else:
+            self.left = left
         self.token = self.op = op
         self.right = right
 
