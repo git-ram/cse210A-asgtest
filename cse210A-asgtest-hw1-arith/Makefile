@@ -55,8 +55,8 @@ test-all:
 	tox
 
 freeze:
-	pyinstaller arith.py
-
+	pyinstaller --onefile --distpath . tests/arith.py
+	chmod a+rwx ./arith
 
 coverage:
 	coverage run --source leviathan_serving setup.py test
