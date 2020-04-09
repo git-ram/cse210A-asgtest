@@ -1,4 +1,9 @@
-""" SPI - Simple Pascal Interpreter """
+""" SPI - Simple Pascal Interpreter
+source:https://ruslanspivak.com/lsbasi-part7/
+I have added signed integers and modulo operator to
+the lexer, parser and interpreter as well.
+"""
+
 
 ###############################################################################
 #                                                                             #
@@ -10,8 +15,8 @@
 #
 # EOF (end-of-file) token is used to indicate that
 # there is no more input left for lexical analysis
-INTEGER, PLUS, MINUS, MUL, DIV, LPAREN, RPAREN, EOF = (
-    'INTEGER', 'PLUS', 'MINUS', 'MUL', 'DIV', '(', ')', 'EOF'
+INTEGER, PLUS, MINUS, MUL, DIV, LPAREN, RPAREN, EOF, MOD = (
+    'INTEGER', 'PLUS', 'MINUS', 'MUL', 'DIV', '(', ')', 'EOF', 'MOD'
 )
 
 
@@ -99,6 +104,10 @@ class Lexer(object):
                 self.advance()
                 return Token(DIV, '/')
 
+            if self.current_char == '%':
+                self.advance()
+                return Token(MOD, '%')
+
             if self.current_char == '(':
                 self.advance()
                 return Token(LPAREN, '(')
@@ -180,12 +189,14 @@ class Parser(object):
         """term : factor ((MUL | DIV) factor)*"""
         node = self.factor()
 
-        while self.current_token.type in (MUL, DIV):
+        while self.current_token.type in (MUL, DIV, MOD):
             token = self.current_token
             if token.type == MUL:
                 self.eat(MUL)
             elif token.type == DIV:
                 self.eat(DIV)
+            elif token.type == MOD:
+                self.eat(MOD)
 
             node = BinOp(left=node, op=token, right=self.factor())
 
@@ -194,7 +205,7 @@ class Parser(object):
     def expr(self):
         """
         expr   : term ((PLUS | MINUS) term)*
-        term   : factor ((MUL | DIV) factor)*
+        term   : factor ((MUL | DIV | MOD) factor)*
         factor : INTEGER | LPAREN expr RPAREN
         """
         node = self.term()
@@ -243,6 +254,8 @@ class Interpreter(NodeVisitor):
             return self.visit(node.left) * self.visit(node.right)
         elif node.op.type == DIV:
             return self.visit(node.left) / self.visit(node.right)
+        elif node.op.type == MOD:
+            return self.visit(node.left) % self.visit(node.right)
 
     def visit_Num(self, node):
         return node.value
@@ -250,7 +263,6 @@ class Interpreter(NodeVisitor):
     def interpret(self):
         tree = self.parser.parse()
         return self.visit(tree)
-
 
 def main():
 
