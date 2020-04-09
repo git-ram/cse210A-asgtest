@@ -266,7 +266,6 @@ class Interpreter(NodeVisitor):
     def get_AST(self):
         return self.parser.parse()
 
-
 def main():
 
     try:
