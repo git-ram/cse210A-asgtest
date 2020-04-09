@@ -260,9 +260,12 @@ class Interpreter(NodeVisitor):
     def visit_Num(self, node):
         return node.value
 
-    def interpret(self):
-        tree = self.parser.parse()
+    def eval(self, tree):
         return self.visit(tree)
+
+    def get_AST(self):
+        return self.parser.parse()
+
 
 def main():
 
@@ -279,7 +282,8 @@ def main():
     lexer = Lexer(text)
     parser = Parser(lexer)
     interpreter = Interpreter(parser)
-    result = interpreter.interpret()
+    ast_tree = interpreter.get_AST()
+    result = interpreter.eval(ast_tree)
     print(result)
 
 
